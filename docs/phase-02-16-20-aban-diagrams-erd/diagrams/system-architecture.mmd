@@ -1,0 +1,40 @@
+flowchart TB
+    User(["👤 System User (Admin / Operator / Manager)"])
+
+    subgraph Browser ["Web Browser (Persian RTL Client SPA)"]
+        ReactUI["React 18 + TypeScript UI (Tailwind CSS + shadcn/ui)"]
+        QueryCache["Server State & API Client (TanStack Query + Axios)"]
+        FormEngine["Form Validation & Jalali Date Formatter (React Hook Form + Zod + Intl/Jalali)"]
+        ReactUI --> FormEngine
+        ReactUI --> QueryCache
+    end
+
+    subgraph Server ["Application Server (NestJS Modular Monolith)"]
+        REST_API["REST API Controllers (/api/auth, /api/products, /api/warehouses, /api/inventory)"]
+        SecPipeline["Security & Validation Pipeline (JwtAuthGuard -> RolesGuard -> ValidationPipe)"]
+
+        subgraph Modules ["Encapsulated Domain Modules"]
+            M_Auth["Auth & Users Module"]
+            M_Catalog["Catalog Module (Products & Categories)"]
+            M_Warehouse["Warehouses Module (Warehouses & Operator Assignments)"]
+            M_Inventory["Inventory Module (Ledger & Balance Engine)"]
+            M_Dashboard["Dashboard Module"]
+        end
+
+        PrismaORM["Persistence & Transaction Manager (Prisma Client)"]
+
+        REST_API --> SecPipeline
+        SecPipeline --> Modules
+        M_Inventory -.->|"Verify operator warehouse assignment"| M_Warehouse
+        M_Inventory -.->|"Verify active product status"| M_Catalog
+        M_Dashboard -.->|"Aggregate KPI metrics"| M_Inventory
+        Modules --> PrismaORM
+    end
+
+    subgraph Database ["Persistent Data Tier"]
+        Postgres[("PostgreSQL 16 Database (ACID Transactions & Constraints)")]
+    end
+
+    User <-->|"Interacts with Persian RTL Views"| ReactUI
+    QueryCache <-->|"HTTPS / JSON + Bearer JWT"| REST_API
+    PrismaORM <-->|"SQL / TCP Connection Pool"| Postgres

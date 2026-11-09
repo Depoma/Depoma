@@ -1,0 +1,56 @@
+flowchart LR
+    Admin(["👤 System Administrator (Admin)"])
+    Operator(["👷 Warehouse Operator (Operator)"])
+    Manager(["📊 Operations Manager (Manager)"])
+
+    subgraph Depoma_System ["Depoma Inventory Management System Boundary"]
+        direction TB
+        UC_Auth("Authenticate & Manage Session (Login / Logout)")
+        UC_Dash("View Operational Dashboard (View Dashboard)")
+        
+        subgraph Admin_Capabilities ["Master Data & Access Administration (Admin Only)"]
+            UC_Users("Manage User Accounts & Roles (Manage Users)")
+            UC_Assign("Assign Operators to Warehouses (Manage Warehouse_Operators)")
+            UC_Warehouses("Create & Update Warehouses (Manage Warehouses)")
+            UC_Catalog("Manage Products & Categories (Manage Catalog)")
+        end
+
+        subgraph Inventory_Operations ["Core Inventory & Ledger Operations (Warehouse-Scoped)"]
+            UC_StockIn("Record Stock Receipt (Stock In / Receipt)")
+            UC_StockOut("Record Stock Issue (Stock Out / Issue)")
+            UC_CheckAccess{{"«include» Verify Warehouse Access & Stock Availability"}}
+        end
+
+        subgraph Audit_Views ["Inventory Visibility & Auditing (Warehouse-Scoped)"]
+            UC_ViewBal("View Current Warehouse Balances (View Inventory Balances)")
+            UC_ViewHist("Inspect & Filter Movement History (View Immutable Ledger)")
+        end
+    end
+
+    Admin --> UC_Auth
+    Admin --> UC_Dash
+    Admin --> UC_Users
+    Admin --> UC_Assign
+    Admin --> UC_Warehouses
+    Admin --> UC_Catalog
+    Admin --> UC_StockIn
+    Admin --> UC_StockOut
+    Admin --> UC_ViewBal
+    Admin --> UC_ViewHist
+
+    Operator --> UC_Auth
+    Operator --> UC_Dash
+    Operator --> UC_StockIn
+    Operator --> UC_StockOut
+    Operator --> UC_ViewBal
+    Operator --> UC_ViewHist
+
+    Manager --> UC_Auth
+    Manager --> UC_Dash
+    Manager --> UC_ViewBal
+    Manager --> UC_ViewHist
+
+    UC_StockIn -.->|include| UC_CheckAccess
+    UC_StockOut -.->|include| UC_CheckAccess
+    UC_ViewBal -.->|include| UC_CheckAccess
+    UC_ViewHist -.->|include| UC_CheckAccess

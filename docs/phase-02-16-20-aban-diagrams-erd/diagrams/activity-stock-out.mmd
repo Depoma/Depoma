@@ -1,0 +1,47 @@
+flowchart TD
+    Start([Start: User on Inventory Balances Screen]) --> SelectAction[Select warehouse, product, and click 'Record Stock Out']
+    SelectAction --> FillForm[Enter issue quantity, movement reason, reference number, and notes]
+    FillForm --> ClientValidation{Client-Side Form Validation: Quantity > 0 and required fields valid?}
+
+    ClientValidation -- "No (Form Error)" --> ShowClientErr[Render inline Persian validation errors under fields]
+    ShowClientErr --> FillForm
+
+    ClientValidation -- "Yes" --> SendAPI["Dispatch POST /api/inventory/issues to Backend"]
+    SendAPI --> CheckAuth{1. JWT Authentication Check: Is Bearer token valid and active?}
+
+    CheckAuth -- "No (401 Unauthorized)" --> Err401[Reject request and redirect client to Login screen]
+    Err401 --> EndNode([End])
+
+    CheckAuth -- "Yes" --> CheckRole{2. Role & Warehouse Ownership Check: Is user ADMIN, or OPERATOR assigned to target warehouse in Warehouse_Operators?}
+
+    CheckRole -- "No (403 Forbidden)" --> Err403["Reject request: FORBIDDEN_WAREHOUSE_ACCESS / FORBIDDEN_ROLE"]
+    Err403 --> ShowServerErr[Display error alert banner in UI]
+    ShowServerErr --> EndNode
+
+    CheckRole -- "Yes (Authorized)" --> ServerVal{3. DTO Schema Validation: Is quantity > 0 integer and UUIDs valid?}
+
+    ServerVal -- "No (400 Bad Request)" --> Err400["Reject request: VALIDATION_ERROR"]
+    Err400 --> ShowServerErr
+
+    ServerVal -- "Yes" --> BeginTx["4. Open Interactive Database Transaction (BEGIN), Verify Warehouse & Product ACTIVE (FOR SHARE), and Lock Balance Row (SELECT ... FOR UPDATE)"]
+    BeginTx --> CheckActive{5. Are Warehouse & Product ACTIVE?}
+
+    CheckActive -- "No (422 Inactive)" --> RollbackInactive["Rollback Transaction (ROLLBACK) and Return 422 INACTIVE_RESOURCE"]
+    RollbackInactive --> ShowServerErr
+
+    CheckActive -- "Yes" --> CheckStock{6. Availability Verification: Is current_quantity >= requested_quantity?}
+
+    CheckStock -- "No: Insufficient Stock (422)" --> RollbackStock["Rollback Transaction (ROLLBACK) and Return 422 INSUFFICIENT_STOCK"]
+    RollbackStock --> Err422["Display error alert in modal with current available balance"]
+    Err422 --> EndNode
+
+    CheckStock -- "Yes: Sufficient Stock" --> UpdateDB["7. Deduct quantity in Inventory_Balances and insert immutable OUT row in Stock_Movements"]
+    UpdateDB --> CheckDBCommit{8. Did database write succeed?}
+
+    CheckDBCommit -- "No (500 Database Error)" --> RollbackDB["Rollback Transaction (ROLLBACK) to preserve data consistency"]
+    RollbackDB --> Err500["Display server error notification to user"]
+    Err500 --> EndNode
+
+    CheckDBCommit -- "Yes" --> CommitTx["Commit Transaction (COMMIT) and Return HTTP 201 with movement and new balance"]
+    CommitTx --> UpdateUI["Display confirmation banner in RTL UI and refresh balance table and Jalali movement history"]
+    UpdateUI --> EndNode

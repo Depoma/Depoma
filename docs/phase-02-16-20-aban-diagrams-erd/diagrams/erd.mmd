@@ -1,0 +1,83 @@
+erDiagram
+    USERS {
+        uuid id PK
+        varchar full_name
+        varchar email UK
+        varchar password_hash
+        enum role "ADMIN | OPERATOR | MANAGER"
+        enum status "ACTIVE | INACTIVE"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    WAREHOUSES {
+        uuid id PK
+        varchar name UK
+        varchar code UK
+        text address
+        text description
+        enum status "ACTIVE | INACTIVE"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    WAREHOUSE_OPERATORS {
+        uuid id PK
+        uuid warehouse_id FK "UNIQUE(warehouse_id, user_id)"
+        uuid user_id FK "UNIQUE(warehouse_id, user_id)"
+        uuid assigned_by FK
+        timestamptz assigned_at
+    }
+
+    CATEGORIES {
+        uuid id PK
+        varchar name UK
+        text description
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    PRODUCTS {
+        uuid id PK
+        varchar name
+        varchar sku UK
+        uuid category_id FK
+        varchar unit
+        integer minimum_stock "CHECK >= 0"
+        text description
+        enum status "ACTIVE | ARCHIVED"
+        timestamptz created_at
+        timestamptz updated_at
+    }
+
+    INVENTORY_BALANCES {
+        uuid id PK
+        uuid product_id FK "UNIQUE(product_id, warehouse_id)"
+        uuid warehouse_id FK "UNIQUE(product_id, warehouse_id)"
+        integer quantity "CHECK >= 0"
+        timestamptz updated_at
+    }
+
+    STOCK_MOVEMENTS {
+        uuid id PK
+        uuid product_id FK
+        uuid warehouse_id FK
+        enum movement_type "IN | OUT"
+        integer quantity "CHECK > 0"
+        integer balance_after "CHECK >= 0"
+        varchar reference_no
+        varchar reason
+        text description
+        uuid created_by FK
+        timestamptz created_at
+    }
+
+    USERS ||--o{ WAREHOUSE_OPERATORS : "assigned to"
+    USERS ||--o{ WAREHOUSE_OPERATORS : "granted by"
+    WAREHOUSES ||--o{ WAREHOUSE_OPERATORS : "managed by"
+    CATEGORIES ||--o{ PRODUCTS : "categorizes"
+    PRODUCTS ||--o{ INVENTORY_BALANCES : "has balance"
+    WAREHOUSES ||--o{ INVENTORY_BALANCES : "stores"
+    PRODUCTS ||--o{ STOCK_MOVEMENTS : "recorded in"
+    WAREHOUSES ||--o{ STOCK_MOVEMENTS : "logged at"
+    USERS ||--o{ STOCK_MOVEMENTS : "created by"

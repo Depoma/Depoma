@@ -1,0 +1,57 @@
+# ==========================================
+# Depoma Project — Standard .gitignore
+# ==========================================
+
+# Environment Variables & Secrets (NEVER COMMIT)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+secrets/
+
+# Node.js & Package Managers (Frontend & Backend)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Build Outputs & Caches
+dist/
+build/
+out/
+.next/
+.vite/
+.turbo/
+*.tsbuildinfo
+
+# Testing & Coverage Reports
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# Database & Local Volumes
+postgres-data/
+pgdata/
+*.sqlite
+*.sqlite3
+*.db
+
+# IDEs & Editors
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,83 @@
+@startuml Depoma_Stock_Out_Activity_Diagram
+skinparam ConditionEndStyle hline
+
+|Client (Persian RTL SPA)|
+start
+:Select warehouse, product, and click 'Record Stock Out';
+repeat
+  :Enter issue quantity, movement reason, reference number, and notes;
+  :Validate form inputs client-side (React Hook Form + Zod);
+repeat while (Is quantity > 0 and are required fields valid?) is (No - Render inline validation errors)
+-> Yes;
+:Send POST /api/inventory/issues with JWT Bearer Token;
+
+|Backend API (NestJS Security & Validation Pipeline)|
+if (1. Is JWT token valid and active? [JwtAuthGuard]) then (No - 401 Unauthorized)
+  |Client (Persian RTL SPA)|
+  :Redirect user to Login screen;
+  stop
+else (Yes)
+endif
+
+|Backend API (NestJS Security & Validation Pipeline)|
+if (2. Is user role ADMIN or OPERATOR? [RolesGuard]) then (No: Role is MANAGER - 403)
+  |Client (Persian RTL SPA)|
+  :Display 403 Forbidden alert (FORBIDDEN_ROLE);
+  stop
+else (Yes)
+endif
+
+|Backend API (NestJS Security & Validation Pipeline)|
+if (3. If OPERATOR, is target warehouse assigned in Warehouse_Operators?) then (No - 403 Forbidden)
+  |Client (Persian RTL SPA)|
+  :Display 403 Forbidden alert (FORBIDDEN_WAREHOUSE_ACCESS);
+  stop
+else (Yes - Authorized)
+endif
+
+|Backend API (NestJS Security & Validation Pipeline)|
+if (4. Is DTO schema valid (quantity > 0 integer, valid UUIDs)?) then (No - 400 Bad Request)
+  |Client (Persian RTL SPA)|
+  :Display validation error alert;
+  stop
+else (Yes)
+endif
+
+|Inventory Service & PostgreSQL (ACID Transaction)|
+:Begin Interactive Database Transaction (BEGIN TRANSACTION);
+:Verify Warehouse & Product status == ACTIVE inside transaction (SELECT ... FOR SHARE);
+if (5. Are both Warehouse & Product ACTIVE?) then (No - 422 Inactive Resource)
+  :Rollback Transaction (ROLLBACK TRANSACTION);
+  |Client (Persian RTL SPA)|
+  :Display 422 INACTIVE_RESOURCE error alert;
+  stop
+else (Yes)
+endif
+:Lock product balance row in target warehouse (SELECT quantity ... FOR UPDATE);
+
+if (6. Is available_quantity >= requested_quantity?) then (No: Insufficient Stock - 422)
+  :Rollback Transaction (ROLLBACK TRANSACTION);
+  |Client (Persian RTL SPA)|
+  :Display red error banner (422 INSUFFICIENT_STOCK)\nshowing current available quantity vs. requested quantity;
+  stop
+else (Yes: Sufficient Stock)
+  |Inventory Service & PostgreSQL (ACID Transaction)|
+  :Deduct quantity in Inventory_Balances;
+  :Insert immutable OUT record into Stock_Movements with updated balance_after;
+  if (7. Did database write succeed?) then (No - 500 Database Error)
+    :Rollback Transaction (ROLLBACK TRANSACTION);
+    |Client (Persian RTL SPA)|
+    :Display server error notification (data remains consistent);
+    stop
+  else (Yes)
+    |Inventory Service & PostgreSQL (ACID Transaction)|
+    :Commit Transaction (COMMIT TRANSACTION) and return HTTP 201;
+  endif
+endif
+
+|Client (Persian RTL SPA)|
+:Display green confirmation banner (Toast / Alert);
+:Invalidate cache and refresh Inventory Balances table\nand Jalali Movement History feed;
+stop
+
+@enduml

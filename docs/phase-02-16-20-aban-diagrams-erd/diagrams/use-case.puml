@@ -1,0 +1,66 @@
+@startuml Depoma_Use_Case_Diagram
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "System Administrator\n(Admin)" as Admin
+actor "Warehouse Operator\n(Operator)" as Operator
+actor "Operations Manager\n(Manager)" as Manager
+
+rectangle "Depoma Inventory Management System Boundary" {
+
+  package "Authentication & Overview" {
+    usecase "UC-01: Authenticate & Manage Session\n(Login / Logout)" as UC_Auth
+    usecase "UC-02: View Operational Dashboard\n(View Dashboard)" as UC_Dash
+  }
+
+  package "Master Data & Access Administration (Admin Only)" {
+    usecase "UC-03: Manage Users & Roles\n(Manage Users)" as UC_Users
+    usecase "UC-04: Assign Operators to Warehouses\n(Assign Operators)" as UC_Assign
+    usecase "UC-05: Manage Warehouses\n(Create / Edit Warehouses)" as UC_Warehouses
+    usecase "UC-06: Manage Products & Categories\n(Manage Catalog)" as UC_Catalog
+  }
+
+  package "Core Inventory & Ledger Operations (Warehouse-Scoped)" {
+    usecase "UC-07: Record Stock Receipt\n(Stock In / Receipt)" as UC_StockIn
+    usecase "UC-08: Record Stock Issue\n(Stock Out / Issue)" as UC_StockOut
+    usecase "Verify Operator Warehouse Access\n(Warehouse_Operators Check)" as UC_VerifyAccess
+    usecase "Verify Available Balance & Lock Row\n(ACID Transaction Check)" as UC_VerifyStock
+  }
+
+  package "Reporting & Audit Trail (Warehouse-Scoped)" {
+    usecase "UC-09: View Inventory Balances\n(View Current Stock)" as UC_ViewBal
+    usecase "UC-10: View Movement History\n(Inspect Immutable Ledger)" as UC_ViewHist
+  }
+}
+
+Admin --> UC_Auth
+Admin --> UC_Dash
+Admin --> UC_Users
+Admin --> UC_Assign
+Admin --> UC_Warehouses
+Admin --> UC_Catalog
+Admin --> UC_StockIn
+Admin --> UC_StockOut
+Admin --> UC_ViewBal
+Admin --> UC_ViewHist
+
+Operator --> UC_Auth
+Operator --> UC_Dash
+Operator --> UC_StockIn
+Operator --> UC_StockOut
+Operator --> UC_ViewBal
+Operator --> UC_ViewHist
+
+Manager --> UC_Auth
+Manager --> UC_Dash
+Manager --> UC_ViewBal
+Manager --> UC_ViewHist
+
+UC_StockIn ..> UC_VerifyAccess : <<include>>
+UC_StockOut ..> UC_VerifyAccess : <<include>>
+UC_StockOut ..> UC_VerifyStock : <<include>>
+UC_ViewBal ..> UC_VerifyAccess : <<include>>
+UC_ViewHist ..> UC_VerifyAccess : <<include>>
+
+@enduml
