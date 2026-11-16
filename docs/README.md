@@ -40,7 +40,7 @@ This documentation directory is organized into dedicated phase directories mappe
 * 🏗️ **[`phase-02-16-20-aban-diagrams-erd/ARCHITECTURE.md`](./phase-02-16-20-aban-diagrams-erd/ARCHITECTURE.md)** — Modular Monolith architecture, DAG module rules, live JWT check, and SaaS roadmap.
 
 ### Phase 03: 21–24 Aban — Prototype, API Contracts & Hosting Plan
-* 🎨 **[`phase-03-21-24-aban-prototype-api-hosting/PROTOTYPE_SPECIFICATION.md`](./phase-03-21-24-aban-prototype-api-hosting/PROTOTYPE_SPECIFICATION.md)** — Persian RTL visual design system and 8-frame clickable prototype blueprint.
+* 🎨 **[`phase-03-21-24-aban-prototype-api-hosting/PROTOTYPE_SPECIFICATION.md`](./phase-03-21-24-aban-prototype-api-hosting/PROTOTYPE_SPECIFICATION.md)** — Complete Persian RTL MVP frontend and Figma blueprint: role-aware pages, design system, reusable components, responsive layouts, interface states, and clickable flows.
 * 🔌 **[`phase-03-21-24-aban-prototype-api-hosting/API_SPECIFICATION.md`](./phase-03-21-24-aban-prototype-api-hosting/API_SPECIFICATION.md)** — Standardized REST API contracts, request/response envelopes, and error codes.
 * ☁️ **[`phase-03-21-24-aban-prototype-api-hosting/HOSTING_PLAN.md`](./phase-03-21-24-aban-prototype-api-hosting/HOSTING_PLAN.md)** — Cloud provider evaluation, resource limits, and monthly cost estimates.
 * 🛠️ **[`phase-03-21-24-aban-prototype-api-hosting/DEVELOPMENT_GUIDELINES.md`](./phase-03-21-24-aban-prototype-api-hosting/DEVELOPMENT_GUIDELINES.md)** — Coding standards, testing strategy, and Git workflow.

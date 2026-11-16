@@ -80,11 +80,11 @@ All engineering specifications and phase deliverables are structured into dedica
 * 📁 **[Phase 10: 1–3 Bahman — Final Verification & Submission](./docs/phase-10-1-3-bahman-final-verification/README.md)**
 
 > 🔗 **Interactive Figma Prototype:**  
-> `[Pending — Insert public Figma prototype URL here]`
+> `[]`
 
 ---
 
 ## 6. Engineering Team & Ownership
 
-* **Frontend Lead:** `[Insert Team Member 1 Full Name]` — UI/UX & Figma Prototype, React/TypeScript RTL Client, Form Validation, and E2E Testing.
-* **Backend & Database Lead:** `[Insert Team Member 2 Full Name]` — PostgreSQL & Prisma Schema, NestJS Modular Monolith API, Authentication/Authorization Guards, Inventory Ledger Engine, and Cloud Deployment.
+* **Frontend Lead:** `[]` — UI/UX & Figma Prototype, React/TypeScript RTL Client, Form Validation, and E2E Testing.
+* **Backend & Database Lead:** `[]` — PostgreSQL & Prisma Schema, NestJS Modular Monolith API, Authentication/Authorization Guards, Inventory Ledger Engine, and Cloud Deployment.
